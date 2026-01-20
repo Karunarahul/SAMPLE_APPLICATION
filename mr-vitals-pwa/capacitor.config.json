@@ -1,0 +1,5 @@
+{
+  "appId": "io.mrvitals.pwa",
+  "appName": "mr-vitals-pwa",
+  "webDir": "dist"
+}

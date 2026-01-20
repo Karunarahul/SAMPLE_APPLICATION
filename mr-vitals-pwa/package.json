@@ -1,0 +1,35 @@
+{
+    "name": "mr-vitals-pwa",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@capacitor/app": "^7.1.0",
+        "@capacitor/core": "^7.4.4",
+        "@google/generative-ai": "^0.24.1",
+        "@react-three/drei": "^9.96.0",
+        "@react-three/fiber": "^8.15.0",
+        "@react-three/xr": "^5.7.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^7.11.0",
+        "three": "^0.160.0",
+        "webxr-polyfill": "^2.0.3"
+    },
+    "devDependencies": {
+        "@capacitor/android": "^7.4.4",
+        "@capacitor/cli": "^7.4.4",
+        "@types/react": "^18.2.48",
+        "@types/react-dom": "^18.2.18",
+        "@types/webxr": "^0.5.24",
+        "@vitejs/plugin-basic-ssl": "^1.1.0",
+        "@vitejs/plugin-react": "^4.2.1",
+        "vite": "^5.0.12",
+        "ws": "^8.18.3"
+    }
+}

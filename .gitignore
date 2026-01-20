@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.DS_Store
+.idea/
+.vscode/
+*.log
+coverage/
+mn_vitals_pwa/dist/
+mn_vitals_pwa/node_modules/
