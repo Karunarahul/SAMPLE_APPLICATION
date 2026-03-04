@@ -12,8 +12,7 @@ import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
 # The public URL of your deployed cloud_server.py
-# (e.g., "wss://my-health-app.onrender.com/sensor_push")
-CLOUD_SERVER_URL = "ws://localhost:8080/sensor_push" 
+CLOUD_SERVER_URL = "wss://sample-application-3bsj.onrender.com/sensor_push" 
 
 def setup_sensors():
     print("Initializing sensors...")

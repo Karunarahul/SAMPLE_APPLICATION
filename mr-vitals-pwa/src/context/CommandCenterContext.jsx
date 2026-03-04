@@ -20,7 +20,7 @@ export function CommandCenterProvider({ children }) {
     // Connect to Cloud WebSocket Server
     useEffect(() => {
         // Replace with your production cloud URL (e.g. wss://my-app.onrender.com/web_ui)
-        const CLOUD_URL = 'ws://localhost:8080/web_ui';
+        const CLOUD_URL = 'wss://sample-application-3bsj.onrender.com/web_ui';
         let ws;
         let mockInterval;
 
