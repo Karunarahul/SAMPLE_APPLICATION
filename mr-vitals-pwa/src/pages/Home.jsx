@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { XR, Controllers, VRButton, ARButton, useXR } from '@react-three/xr'
 import { useNavigate } from 'react-router-dom'
@@ -8,16 +8,20 @@ import VRCommandCenter from '../scenes/VRCommandCenter'
 import AROverlay from '../scenes/AROverlay'
 
 function SceneManager() {
-    const { mode, enterVR, enterAR } = useCommandCenter()
-    const { isPresenting, player } = useXR()
+    const { mode, exitSession } = useCommandCenter()
+    const { isPresenting } = useXR()
 
-    // Sync XR state with Context Mode
+    // Clean up state when exiting an XR session
     useEffect(() => {
-        if (isPresenting) {
-            // We can't easily distinguish VR/AR from isPresenting alone without checking session, 
-            // but for now we rely on the button clicks setting the mode.
+        if (!isPresenting && mode !== MODES.DASHBOARD) {
+            exitSession();
         }
-    }, [isPresenting])
+    }, [isPresenting, mode, exitSession]);
+
+    // NEVER render the immersive views if WebXR hasn't activated yet. This prevents the "black void" on desktop.
+    if (!isPresenting) {
+        return <DashboardScene />
+    }
 
     switch (mode) {
         case MODES.VR:
@@ -26,13 +30,34 @@ function SceneManager() {
             return <AROverlay />
         case MODES.DASHBOARD:
         default:
+            // Fallback during transition
             return <DashboardScene />
     }
 }
 
-function UIOverlay() {
+function UIOverlay({ isPresenting }) {
     const { vitals, enterVR, enterAR } = useCommandCenter()
     const navigate = useNavigate()
+    const [cameraGranted, setCameraGranted] = useState(false)
+    const [requestingCamera, setRequestingCamera] = useState(false)
+
+    // Hide traditional UI while in immersive mode so it doesn't block hit-testing taps.
+    if (isPresenting) return null;
+
+    const requestCameraPermission = async () => {
+        try {
+            setRequestingCamera(true);
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            // Permission granted, immediately stop the stream to free it for WebXR
+            stream.getTracks().forEach(track => track.stop());
+            setCameraGranted(true);
+        } catch (err) {
+            console.error("Camera permission denied:", err);
+            alert("Camera permission is required for AR mode.");
+        } finally {
+            setRequestingCamera(false);
+        }
+    };
 
     return (
         <>
@@ -118,7 +143,7 @@ function UIOverlay() {
                 </button>
 
                 {/* VR Button with Context Interception */}
-                <div style={{ position: 'relative' }} onClick={enterVR}>
+                <div style={{ position: 'relative' }} onPointerDown={enterVR}>
                     <VRButton
                         sessionInit={{ optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'layers'], domOverlay: { root: document.body } }}
                         style={{
@@ -148,44 +173,90 @@ function UIOverlay() {
                     </VRButton>
                 </div>
 
-                {/* AR Button with Context Interception */}
-                <div style={{ position: 'relative' }} onClick={enterAR}>
-                    <ARButton
-                        sessionInit={{ requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: document.body } }}
-                        style={{
-                            position: 'static',
-                            padding: '16px 32px',
-                            border: '1px solid rgba(236, 72, 153, 0.5)',
-                            borderRadius: '100px',
-                            background: 'linear-gradient(135deg, rgba(219, 39, 119, 0.9) 0%, rgba(190, 24, 93, 0.9) 100%)',
-                            color: 'white',
-                            fontFamily: "'Inter', sans-serif",
-                            fontWeight: '600',
-                            fontSize: '1.1rem',
-                            backdropFilter: 'blur(10px)',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.5), 0 0 15px rgba(219, 39, 119, 0.3) inset',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            width: 'auto',
-                        }}
-                    >
-                        Enter AR Mode
-                    </ARButton>
+                {/* AR Button with Context Interception & Camera Permission Check */}
+                <div style={{ position: 'relative' }}>
+                    {!cameraGranted ? (
+                        <button
+                            onClick={requestCameraPermission}
+                            disabled={requestingCamera}
+                            style={{
+                                position: 'static',
+                                padding: '16px 32px',
+                                border: '1px solid rgba(236, 72, 153, 0.5)',
+                                borderRadius: '100px',
+                                background: 'linear-gradient(135deg, rgba(219, 39, 119, 0.9) 0%, rgba(190, 24, 93, 0.9) 100%)',
+                                color: 'white',
+                                fontFamily: "'Inter', sans-serif",
+                                fontWeight: '600',
+                                fontSize: '1.1rem',
+                                backdropFilter: 'blur(10px)',
+                                cursor: requestingCamera ? 'wait' : 'pointer',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.5), 0 0 15px rgba(219, 39, 119, 0.3) inset',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                width: 'auto',
+                                opacity: requestingCamera ? 0.7 : 1
+                            }}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 10L19.5528 7.72361C20.2177 7.39116 21 7.87465 21 8.61803V15.382C21 16.1253 20.2177 16.6088 19.5528 16.2764L15 14V10Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <rect x="3" y="6" width="12" height="12" rx="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {requestingCamera ? 'Requesting...' : 'Enable Camera for AR'}
+                        </button>
+                    ) : (
+                        <div onPointerDown={enterAR}>
+                            <ARButton
+                                sessionInit={{ requiredFeatures: ['hit-test', 'local-floor'], domOverlay: { root: document.body } }}
+                                style={{
+                                    position: 'static',
+                                    padding: '16px 32px',
+                                    border: '1px solid rgba(236, 72, 153, 0.5)',
+                                    borderRadius: '100px',
+                                    background: 'linear-gradient(135deg, rgba(219, 39, 119, 0.9) 0%, rgba(190, 24, 93, 0.9) 100%)',
+                                    color: 'white',
+                                    fontFamily: "'Inter', sans-serif",
+                                    fontWeight: '600',
+                                    fontSize: '1.1rem',
+                                    backdropFilter: 'blur(10px)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.5), 0 0 15px rgba(219, 39, 119, 0.3) inset',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    width: 'auto',
+                                }}
+                            >
+                                Enter AR Mode
+                            </ARButton>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
     )
 }
 
+function XRStateSync({ onPresentStateChange }) {
+    const { isPresenting } = useXR()
+    useEffect(() => {
+        onPresentStateChange(isPresenting)
+    }, [isPresenting, onPresentStateChange])
+    return null
+}
+
 export default function Home() {
+    const [isPresenting, setIsPresenting] = useState(false)
+
     return (
         <CommandCenterProvider>
-            <UIOverlay />
+            <UIOverlay isPresenting={isPresenting} />
             <Canvas camera={{ position: [0, 5, 15], fov: 50 }} gl={{ alpha: true }}>
                 <XR>
+                    <XRStateSync onPresentStateChange={setIsPresenting} />
                     <Controllers />
                     <SceneManager />
                 </XR>

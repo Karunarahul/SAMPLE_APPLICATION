@@ -14,7 +14,7 @@ export default function DashboardScene() {
             <directionalLight position={[5, 10, 7.5]} intensity={1} shadow-mapSize={[2048, 2048]} />
 
             <group ref={groupRef}>
-                <FloatingPanel data={vitals} />
+                <FloatingPanel data={vitals} position={[-4.5, 3.5, 2]} scale={0.6} />
                 <DigitalTwin position={[4, 0, 1.8]} scale={0.05} />
             </group>
 

@@ -106,7 +106,7 @@ export default function AnalysisPanel({ onClose, data, isLoading, embedded = fal
                             </div>
                         </div>
 
-                        {/* AI Insight Section */}
+                        {/* Executive Summary */}
                         <div>
                             <div style={{
                                 display: 'flex',
@@ -119,32 +119,110 @@ export default function AnalysisPanel({ onClose, data, isLoading, embedded = fal
                                 <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                AI Diagnosis & Insights
+                                Executive Summary
                             </div>
                             <div style={{
                                 lineHeight: '1.6',
-                                color: '#D1D5DB',
-                                fontSize: '0.95rem',
-                                background: 'rgba(255, 255, 255, 0.03)',
+                                color: '#F3F4F6',
+                                fontSize: '1rem',
+                                background: 'rgba(56, 189, 248, 0.1)',
                                 padding: '16px',
                                 borderRadius: '16px',
-                                border: '1px solid rgba(255, 255, 255, 0.05)'
+                                border: '1px solid rgba(56, 189, 248, 0.2)'
                             }}>
                                 {data.insight}
                             </div>
                         </div>
 
-                        {/* Contributing Factors */}
-                        {data.contributingFactors && data.contributingFactors.length > 0 && (
+                        {/* Detailed Vital Breakdown */}
+                        {data.detailedAnalysis && data.detailedAnalysis.length > 0 && (
                             <div>
                                 <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    marginBottom: '12px',
                                     color: '#9CA3AF',
-                                    fontSize: '0.875rem',
-                                    marginBottom: '8px',
                                     fontWeight: '600'
                                 }}>
-                                    Key Factors
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                    Detailed Breakdown
                                 </div>
+                                <ul style={{
+                                    margin: 0,
+                                    paddingLeft: '24px',
+                                    color: '#D1D5DB',
+                                    fontSize: '0.95rem',
+                                    lineHeight: '1.6',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '8px'
+                                }}>
+                                    {data.detailedAnalysis.map((item, idx) => (
+                                        <li key={idx} style={{ listStyleType: 'disc', color: '#9CA3AF' }}>
+                                            <span style={{ color: '#D1D5DB' }}>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Actionable Recommendations */}
+                        {data.recommendations && data.recommendations.length > 0 && (
+                            <div>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    marginBottom: '12px',
+                                    color: '#34D399',
+                                    fontWeight: '600'
+                                }}>
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Actionable Steps
+                                </div>
+                                <div style={{
+                                    background: 'rgba(52, 211, 153, 0.05)',
+                                    padding: '16px',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(52, 211, 153, 0.1)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '12px'
+                                }}>
+                                    {data.recommendations.map((rec, idx) => (
+                                        <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                            <div style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                borderRadius: '50%',
+                                                background: 'rgba(52, 211, 153, 0.2)',
+                                                color: '#34D399',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 'bold',
+                                                flexShrink: 0
+                                            }}>
+                                                {idx + 1}
+                                            </div>
+                                            <div style={{ color: '#E5E7EB', fontSize: '0.95rem', lineHeight: '1.5', paddingTop: '1px' }}>
+                                                {rec}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Contributing Factors (Warnings) */}
+                        {data.contributingFactors && data.contributingFactors.length > 0 && (
+                            <div>
                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                     {data.contributingFactors.map((factor, i) => (
                                         <span key={i} style={{
@@ -155,7 +233,7 @@ export default function AnalysisPanel({ onClose, data, isLoading, embedded = fal
                                             fontSize: '0.8rem',
                                             border: '1px solid rgba(239, 68, 68, 0.2)'
                                         }}>
-                                            {factor}
+                                            ⚠️ {factor}
                                         </span>
                                     ))}
                                 </div>

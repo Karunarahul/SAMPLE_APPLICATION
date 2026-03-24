@@ -23,6 +23,7 @@ export function CommandCenterProvider({ children }) {
         const CLOUD_URL = 'wss://sample-application-3bsj.onrender.com/web_ui';
         let ws;
         let mockInterval;
+        let reconnectTimeout;
 
         const connect = () => {
             ws = new WebSocket(CLOUD_URL);
@@ -30,6 +31,7 @@ export function CommandCenterProvider({ children }) {
             ws.onopen = () => {
                 console.log('Connected to Cloud Vitals Hub');
                 if (mockInterval) clearInterval(mockInterval);
+                if (reconnectTimeout) clearTimeout(reconnectTimeout);
             };
 
             ws.onmessage = (event) => {
@@ -49,6 +51,7 @@ export function CommandCenterProvider({ children }) {
 
             ws.onclose = () => {
                 console.log('Disconnected from Cloud Hub, falling back to simulated data...');
+                if (mockInterval) clearInterval(mockInterval);
                 // Fallback simulated data
                 mockInterval = setInterval(() => {
                     setVitals(prev => ({
@@ -61,7 +64,8 @@ export function CommandCenterProvider({ children }) {
                 }, 3000);
 
                 // Attempt reconnect
-                setTimeout(connect, 5000);
+                if (reconnectTimeout) clearTimeout(reconnectTimeout);
+                reconnectTimeout = setTimeout(connect, 5000);
             };
 
             ws.onerror = (err) => {
@@ -75,6 +79,7 @@ export function CommandCenterProvider({ children }) {
         return () => {
             if (ws) ws.close();
             if (mockInterval) clearInterval(mockInterval);
+            if (reconnectTimeout) clearTimeout(reconnectTimeout);
         };
     }, []);
 

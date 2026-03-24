@@ -7,87 +7,85 @@ const ECGGraph = ({ hr }) => {
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let timeoutId;
 
-        // Set canvas size for retina
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
+        const initCanvas = () => {
+            let width = canvas.clientWidth;
+            let height = canvas.clientHeight;
+            
+            // If inside Html transform, DOM layout might be 0 momentarily. Provide fallbacks.
+            if (width === 0) width = 380; 
+            if (height === 0) height = 50;
 
-        ctx.strokeStyle = '#4ade80';
-        ctx.lineWidth = 2;
-        ctx.lineJoin = 'round';
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = '#4ade80';
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
 
-        let x = 0;
-        let lastY = rect.height / 2;
-        let frameCount = 0;
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#4ade80';
 
-        // PQRST Wave points relative to a single 'beat' cycle
-        // A beat takes roughly 60/hr seconds.
-        const render = () => {
-            const currentHR = hr || 60;
-            const framesPerBeat = 3600 / currentHR;
+            let x = 0;
+            let lastY = height / 2;
+            let frameCount = 0;
 
-            // Current position in the beat cycle (0 to 1)
-            const t = (frameCount % framesPerBeat) / framesPerBeat;
+            const render = () => {
+                const currentHR = hr || 60;
+                // Roughly 3600 frames at 60fps for 60 seconds. A beat at 60bpm is 60 frames.
+                const framesPerBeat = Math.floor(3600 / currentHR);
 
-            // Calculate Y based on PQRST
-            let yOffset = 0;
+                const t = (frameCount % framesPerBeat) / framesPerBeat;
+                let yOffset = 0;
+                const noise = (Math.random() - 0.5) * 2;
 
-            // Add some random noise for realism
-            const noise = (Math.random() - 0.5) * 2;
+                if (t > 0.10 && t < 0.15) yOffset = -3;
+                else if (t > 0.15 && t < 0.18) yOffset = 0;
+                else if (t > 0.18 && t < 0.22) yOffset = 2;
+                else if (t > 0.22 && t < 0.30) yOffset = -25;
+                else if (t > 0.30 && t < 0.34) yOffset = 4;
+                else if (t > 0.34 && t < 0.40) yOffset = 0;
+                else if (t > 0.40 && t < 0.55) yOffset = -4;
 
-            // PQRST Complex
-            if (t > 0.10 && t < 0.15) yOffset = -3;  // P
-            else if (t > 0.15 && t < 0.18) yOffset = 0;
-            else if (t > 0.18 && t < 0.22) yOffset = 2;   // Q
-            else if (t > 0.22 && t < 0.30) yOffset = -25; // R (Big Spike)
-            else if (t > 0.30 && t < 0.34) yOffset = 4;   // S
-            else if (t > 0.34 && t < 0.40) yOffset = 0;
-            else if (t > 0.40 && t < 0.55) yOffset = -4;  // T
+                const baseHeight = height / 2;
+                const currentY = baseHeight + yOffset + noise;
 
-            const baseHeight = rect.height / 2;
-            const currentY = baseHeight + yOffset + noise;
+                const cleanWidth = 15;
+                ctx.clearRect(x, 0, cleanWidth, height);
 
-            // Fade effect: Clear a specific rectangle ahead of the draw head
-            // Instead of full clear, we can draw a semi-transparent rect over the whole canvas to fade old trails?
-            // Or the traditional "wiper" bar.
+                ctx.beginPath();
+                if (x > 0) {
+                    ctx.moveTo(x - 2, lastY);
+                    ctx.lineTo(x, currentY);
+                }
+                ctx.stroke();
 
-            // Wiper method: Clear a small bar ahead of x
-            const cleanWidth = 10;
-            ctx.clearRect(x, 0, cleanWidth, rect.height);
+                lastY = currentY;
+                x += 2;
 
-            // Draw Line
-            ctx.beginPath();
-            // If x was just reset, don't draw line from end to start
-            if (x > 0) {
-                ctx.moveTo(x - 2, lastY);
-                ctx.lineTo(x, currentY);
-            }
-            ctx.stroke();
+                if (x >= width) {
+                    x = 0;
+                    lastY = baseHeight;
+                }
 
-            // Store for next frame
-            lastY = currentY;
+                frameCount++;
+                animationFrameId = requestAnimationFrame(render);
+            };
 
-            // Move forward
-            const speed = 2; // Pixels per frame
-            x += speed;
-
-            // Wrap around
-            if (x > rect.width) {
-                x = 0;
-                lastY = baseHeight;
-            }
-
-            frameCount++;
             animationFrameId = requestAnimationFrame(render);
         };
 
-        let animationFrameId = requestAnimationFrame(render);
-        return () => cancelAnimationFrame(animationFrameId);
+        // Delay slightly to give DOM time to render bounding rects
+        timeoutId = setTimeout(initCanvas, 50);
+
+        return () => {
+            clearTimeout(timeoutId);
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        };
     }, [hr]);
 
     return (
@@ -97,7 +95,7 @@ const ECGGraph = ({ hr }) => {
     )
 }
 
-export default function FloatingPanel({ data }) {
+export default function FloatingPanel({ data, position = [-5, 3.5, 1.8], scale = 0.005 }) {
     // Alert Conditions
     const isHighHR = data.hr > 100;
     const isLowHR = data.hr < 50;
@@ -107,7 +105,7 @@ export default function FloatingPanel({ data }) {
     const pulseColor = isAbnormal ? '#ef4444' : '#4ade80';
 
     return (
-        <group position={[-5, 3.5, 1.8]}>
+        <group position={position} scale={scale}>
             <Html center transform>
                 <div style={{
                     width: '450px',
