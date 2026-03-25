@@ -173,67 +173,39 @@ function UIOverlay({ isPresenting }) {
                     </VRButton>
                 </div>
 
-                {/* AR Button with Context Interception & Camera Permission Check */}
-                <div style={{ position: 'relative' }}>
-                    {!cameraGranted ? (
-                        <button
-                            onClick={requestCameraPermission}
-                            disabled={requestingCamera}
-                            style={{
-                                position: 'static',
-                                padding: '16px 32px',
-                                border: '1px solid rgba(236, 72, 153, 0.5)',
-                                borderRadius: '100px',
-                                background: 'linear-gradient(135deg, rgba(219, 39, 119, 0.9) 0%, rgba(190, 24, 93, 0.9) 100%)',
-                                color: 'white',
-                                fontFamily: "'Inter', sans-serif",
-                                fontWeight: '600',
-                                fontSize: '1.1rem',
-                                backdropFilter: 'blur(10px)',
-                                cursor: requestingCamera ? 'wait' : 'pointer',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.5), 0 0 15px rgba(219, 39, 119, 0.3) inset',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                width: 'auto',
-                                opacity: requestingCamera ? 0.7 : 1
-                            }}
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15 10L19.5528 7.72361C20.2177 7.39116 21 7.87465 21 8.61803V15.382C21 16.1253 20.2177 16.6088 19.5528 16.2764L15 14V10Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <rect x="3" y="6" width="12" height="12" rx="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            {requestingCamera ? 'Requesting...' : 'Enable Camera for AR'}
-                        </button>
-                    ) : (
-                        <div onPointerDown={enterAR}>
-                            <ARButton
-                                sessionInit={{ requiredFeatures: ['hit-test', 'local-floor'], domOverlay: { root: document.body } }}
-                                style={{
-                                    position: 'static',
-                                    padding: '16px 32px',
-                                    border: '1px solid rgba(236, 72, 153, 0.5)',
-                                    borderRadius: '100px',
-                                    background: 'linear-gradient(135deg, rgba(219, 39, 119, 0.9) 0%, rgba(190, 24, 93, 0.9) 100%)',
-                                    color: 'white',
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontWeight: '600',
-                                    fontSize: '1.1rem',
-                                    backdropFilter: 'blur(10px)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.5), 0 0 15px rgba(219, 39, 119, 0.3) inset',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px',
-                                    width: 'auto',
-                                }}
-                            >
-                                Enter AR Mode
-                            </ARButton>
-                        </div>
-                    )}
+                {/* AR Button with Native WebXR Context Interception */}
+                <div style={{ position: 'relative' }} onPointerDown={enterAR}>
+                    <ARButton
+                        sessionInit={{ 
+                            requiredFeatures: ['hit-test', 'dom-overlay'], 
+                            optionalFeatures: ['light-estimation', 'anchors', 'local-floor', 'depth-sensing'],
+                            domOverlay: { root: document.body } 
+                        }}
+                        style={{
+                            position: 'static',
+                            padding: '16px 32px',
+                            border: '1px solid rgba(236, 72, 153, 0.5)',
+                            borderRadius: '100px',
+                            background: 'linear-gradient(135deg, rgba(219, 39, 119, 0.9) 0%, rgba(190, 24, 93, 0.9) 100%)',
+                            color: 'white',
+                            fontFamily: "'Inter', sans-serif",
+                            fontWeight: '600',
+                            fontSize: '1.1rem',
+                            backdropFilter: 'blur(10px)',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.5), 0 0 15px rgba(219, 39, 119, 0.3) inset',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            width: 'auto',
+                            left: 'auto',
+                            transform: 'none',
+                            bottom: 'auto'
+                        }}
+                    >
+                        Enter AR Mode
+                    </ARButton>
                 </div>
             </div>
         </>
