@@ -236,6 +236,38 @@ function UIOverlay({ isPresenting }) {
                     </ARButton>
                 </div>
 
+                {/* Iron Man AR Mode */}
+                <button
+                    onClick={() => navigate('/ironman-ar')}
+                    style={{
+                        padding: '16px 32px',
+                        border: '1px solid rgba(0, 255, 255, 0.5)',
+                        borderRadius: '100px',
+                        background: 'linear-gradient(135deg, rgba(0, 200, 255, 0.9) 0%, rgba(0, 150, 200, 0.9) 100%)',
+                        color: 'white',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: '600',
+                        fontSize: '1.1rem',
+                        backdropFilter: 'blur(10px)',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 10px 25px -5px rgba(0, 255, 255, 0.5), 0 0 15px rgba(0, 255, 255, 0.3) inset',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                    }}
+                    onMouseOver={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                        e.currentTarget.style.boxShadow = '0 20px 30px -10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 255, 255, 0.4) inset';
+                    }}
+                    onMouseOut={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                        e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 255, 255, 0.5), 0 0 15px rgba(0, 255, 255, 0.3) inset';
+                    }}
+                >
+                    🦾 Iron Man AR
+                </button>
+
                 {/* BLE Connect Button */}
                 <BLEConnectButton
                     bleStatus={bleStatus}
