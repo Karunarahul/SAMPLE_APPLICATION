@@ -34,7 +34,7 @@ export default function DigitalTwin({ position = [0, 0, 0], scale = 0.05 }) {
     const heartRef = useRef();
 
     // Load Model & Animations
-    const fbx = useFBX('/Breathing Idle-MH.fbx');
+    const fbx = useFBX(`${import.meta.env.BASE_URL}Breathing Idle-MH.fbx`);
     const { actions } = useAnimations(fbx.animations, group);
 
     // Heartbeat Animation Logic

@@ -36,7 +36,7 @@ const WelcomePage = ({ onEnter }) => {
                     marginBottom: '1rem'
                 }}>
                     <img
-                        src="/logo-new.png"
+                        src={`${import.meta.env.BASE_URL}logo-new.png`}
                         alt="Safe Vitals Logo"
                         style={{
                             width: '80px',
