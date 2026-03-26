@@ -6,6 +6,7 @@ import { CommandCenterProvider, useCommandCenter, MODES } from '../context/Comma
 import DashboardScene from '../scenes/DashboardScene'
 import VRCommandCenter from '../scenes/VRCommandCenter'
 import AROverlay from '../scenes/AROverlay'
+import BLEConnectButton from '../components/BLEConnectButton'
 
 function SceneManager() {
     const { mode, exitSession } = useCommandCenter()
@@ -36,7 +37,7 @@ function SceneManager() {
 }
 
 function UIOverlay({ isPresenting }) {
-    const { vitals, enterVR, enterAR } = useCommandCenter()
+    const { vitals, enterVR, enterAR, bleStatus, bleError, connectBLE, disconnectBLE, connectionSource } = useCommandCenter()
     const navigate = useNavigate()
     const [cameraGranted, setCameraGranted] = useState(false)
     const [requestingCamera, setRequestingCamera] = useState(false)
@@ -95,6 +96,33 @@ function UIOverlay({ isPresenting }) {
                 >
                     <span style={{ fontSize: '1.2rem' }}>←</span> Back
                 </button>
+            </div>
+
+            {/* Connection Source Badge */}
+            <div style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                zIndex: 1000,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '0.75rem',
+                color: 'white',
+                letterSpacing: '0.5px'
+            }}>
+                <div style={{
+                    width: '8px', height: '8px', borderRadius: '50%',
+                    background: connectionSource === 'ble' ? '#10B981' : connectionSource === 'websocket' ? '#3B82F6' : '#F59E0B',
+                    boxShadow: `0 0 6px ${connectionSource === 'ble' ? '#10B981' : connectionSource === 'websocket' ? '#3B82F6' : '#F59E0B'}`
+                }} />
+                {connectionSource === 'ble' ? '🔗 BLE' : connectionSource === 'websocket' ? '☁️ Cloud' : '📡 Simulated'}
             </div>
 
             {/* Enhanced AI Analysis & VR Buttons */}
@@ -207,6 +235,14 @@ function UIOverlay({ isPresenting }) {
                         Enter AR Mode
                     </ARButton>
                 </div>
+
+                {/* BLE Connect Button */}
+                <BLEConnectButton
+                    bleStatus={bleStatus}
+                    onConnect={connectBLE}
+                    onDisconnect={disconnectBLE}
+                    error={bleError}
+                />
             </div>
         </>
     )

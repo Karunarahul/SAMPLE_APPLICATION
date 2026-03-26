@@ -195,6 +195,32 @@ export default function FloatingPanel({ data, position = [-5, 3.5, 1.8], scale =
                                 {isHighHR ? 'TACHYCARDIA DETECTED' : isLowHR ? 'BRADYCARDIA DETECTED' : 'Normal Sinus Rhythm'}
                             </div>
                         </div>
+
+                        {/* Motion Sensor */}
+                        {data.motion && (
+                            <div style={{
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                padding: '15px 20px',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(255,255,255,0.05)',
+                                gridColumn: '1 / -1'
+                            }}>
+                                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ color: '#a78bfa' }}>🧭</span> Motion (Accelerometer)
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                                    {['x', 'y', 'z'].map(axis => (
+                                        <div key={axis} style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '11px', color: '#9CA3AF', textTransform: 'uppercase', marginBottom: '4px' }}>{axis}-axis</div>
+                                            <div style={{ fontSize: '24px', fontWeight: '700', color: '#a78bfa' }}>
+                                                {typeof data.motion[axis] === 'number' ? data.motion[axis].toFixed(2) : '0.00'}
+                                            </div>
+                                            <div style={{ fontSize: '10px', color: '#6B7280' }}>m/s²</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Alert Banner */}
