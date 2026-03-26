@@ -7,5 +7,13 @@ export default defineConfig({
     base: '/SAMPLE_APPLICATION/',
     server: {
         host: true
+    },
+    resolve: {
+        alias: [
+            {
+                find: /^@babel\/runtime\/helpers\/esm\/(.*)$/,
+                replacement: '@babel/runtime/helpers/esm/$1.js',
+            }
+        ]
     }
 })
